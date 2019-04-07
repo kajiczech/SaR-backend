@@ -1,4 +1,4 @@
-from django.db.models import Manager
+from django.db.models import Manager, QuerySet
 
 
 class BaseManager(Manager):

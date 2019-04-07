@@ -1,7 +1,12 @@
-from rest_framework import viewsets, serializers, permissions
+from django.core.exceptions import ValidationError
+from django.db.models import Model
+from django.http import JsonResponse
+from rest_framework import viewsets, serializers, permissions, status
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from django.apps import apps
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.utils import json
 from rest_framework.viewsets import ModelViewSet
 
 from backend.core.api.GenericViewSet import GenericViewSet
@@ -37,21 +42,51 @@ class LinkViewSet(GenericViewSet):
         return request
 
 
-    def get_queryset(self):
+    def load_parent_object(self):
+        if self.parent:
+            return
         queryset = self.parent_model.objects
         filter_kwargs = {self.lookup_field: self.kwargs[self.lookup_field]}
-        obj = get_object_or_404(queryset, **filter_kwargs)
+        self.parent = get_object_or_404(queryset, **filter_kwargs)
 
         # May raise a permission denied
-        self.check_object_permissions(self.request, obj)
+        self.check_object_permissions(self.request, self.parent)
 
-        return getattr(obj, self.link).all()
+    def get_queryset(self):
+        return self.get_parent_set().all()
 
     def get_serializer_class(self):
         return self.model.get_serializer()
 
-    def destroy(self, request, *args, **kwargs):
-        self.queryset.remove(self.kwargs['ids'])
+    def remove(self, request, *args, **kwargs):
+        errors = []
+        for id in request.data['ids']:
+            try:
+                self.get_parent_set().remove(self.model.objects.get(id=id))
+            except (self.model.DoesNotExist, ValidationError):
+                errors.append(id)
+        if errors.__len__():
+            data = {}
+            data['errors'] = errors
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+
+    def get_parent_set(self):
+        self.load_parent_object()
+        return getattr(self.parent, self.link)
+
+    def add(self, request, *args, **kwargs):
+        errors = []
+        for id in request.data['ids']:
+            try:
+                self.get_parent_set().add(self.model.objects.get(id=id))
+            except (self.model.DoesNotExist, ValidationError):
+                errors.append(id)
+        if errors.__len__():
+            data = {}
+            data['errors'] = errors
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
 
 
 

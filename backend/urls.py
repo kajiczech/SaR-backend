@@ -60,13 +60,13 @@ urlpatterns = [
 
             re_path(
                 r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)/link/(?P<Link>[A-Za-z-_]+)$',
-                LinkViewSet.as_view({'get': 'list', 'delete': 'destroy'},
+                LinkViewSet.as_view({'get': 'list', 'post': "add",  'delete': 'remove'},
                 application="sar")
             ),
 
             re_path(
                 r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)/link/(?P<Link>[A-Za-z-_]+)/$',
-                LinkViewSet.as_view({'get': 'list', 'delete': 'destroy'},
+                LinkViewSet.as_view({'get': 'list', 'post': "add", 'delete': 'remove'},
                 application="sar")
             ),
 

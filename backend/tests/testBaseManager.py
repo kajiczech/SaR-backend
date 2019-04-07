@@ -20,7 +20,7 @@ AccessToken = get_access_token_model()
 UserModel = get_user_model()
 
 
-class BaseApiTest(TestCase):
+class BaseManagerTest(TestCase):
 
     def testDeleteRetrieve(self):
         model = Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
