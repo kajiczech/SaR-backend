@@ -87,7 +87,7 @@ class GeotagStatuses(StringEnum):
     open = "Open"
     resolved = "Resolved"
     unresolved = "Unresolved"
-    in_proggress = "In Progress"
+    in_progress = "In Progress"
 
 
 class GeotagTypes(StringEnum):
@@ -183,7 +183,33 @@ class CheckedPoint(BaseModel):
         choices=[(a.name, a.value) for a in GeofenceTypes],
         default=CheckedPointTypes.drone
     )
-    radius =            models.IntegerField(blank=True, null=True)
+    radius =            models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
     latitude =          models.DecimalField(max_digits=9, decimal_places=6)
     longitude =         models.DecimalField(max_digits=9, decimal_places=6)
 
+
+class InvitationStatuses(StringEnum):
+    open = "Open"
+    accepted = "Accepted"
+    rejected = "Rejected"
+
+
+class InvitationTypes(StringEnum):
+    regular = "Regular"
+    organizer = "Organizer"
+
+
+class Invitation(BaseModel):
+    invitee = models.ForeignKey(get_user_model(), related_name="invitations", on_delete=models.CASCADE)
+    operation = models.ForeignKey(Operation, related_name="invitations", on_delete=models.CASCADE)
+    type = models.CharField(
+        max_length=31,
+        choices=[(a.name, a.value) for a in InvitationTypes],
+        default=InvitationTypes.regular
+    )
+
+    status = models.CharField(
+        max_length=31,
+        choices=[(a.name, a.value) for a in InvitationStatuses],
+        default=InvitationStatuses.open
+    )
