@@ -59,12 +59,12 @@ class LinkViewSet(GenericViewSet):
         return self.model.get_serializer()
 
     def remove(self, request, *args, **kwargs):
-        errors = []
+        errors = {}
         for id in request.data['ids']:
             try:
                 self.get_parent_set().remove(self.model.objects.get(id=id))
-            except (self.model.DoesNotExist, ValidationError):
-                errors.append(id)
+            except (self.model.DoesNotExist, ValidationError, self.parent_model.DoesNotExist) as e:
+                errors[id] = e
         if errors.__len__():
             data = {}
             data['errors'] = errors
@@ -76,12 +76,12 @@ class LinkViewSet(GenericViewSet):
         return getattr(self.parent, self.link)
 
     def add(self, request, *args, **kwargs):
-        errors = []
+        errors = {}
         for id in request.data['ids']:
             try:
                 self.get_parent_set().add(self.model.objects.get(id=id))
-            except (self.model.DoesNotExist, ValidationError):
-                errors.append(id)
+            except (self.model.DoesNotExist, ValidationError, self.parent_model.DoesNotExist) as e:
+                errors[id] = e
         if errors.__len__():
             data = {}
             data['errors'] = errors

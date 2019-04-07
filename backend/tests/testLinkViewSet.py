@@ -129,7 +129,7 @@ class PostAdd(BaseApiTest):
         response = self.view(request, id=str(self.admin_user.id), Model="user", Link="created_operations")
         assert response.status_code == 400
         assert self.admin_user.created_operations.count() == 0
-        assert response.data['errors'][0] == str(self.admin_user.id)
+        assert response.data['errors'][str(self.admin_user.id)]
 
 
 class DeleteRemove(BaseApiTest):
@@ -178,4 +178,4 @@ class DeleteRemove(BaseApiTest):
         response = self.view(request, id=str(self.admin_user.id), Model="user", Link="created_operations")
         assert response.status_code == 400
         assert self.admin_user.created_operations.count() == 0
-        assert response.data['errors'][0] == str(self.admin_user.id)
+        assert response.data['errors'][str(self.admin_user.id)]
