@@ -49,6 +49,22 @@ class BaseManagerTest(TestCase):
         self.assertRaises(Operation.DoesNotExist, Operation.objects.get, id=model.id, deleted=1)
         operation.delete(from_db=True)
 
+    def testDeleteRelated(self):
+        admin_user = get_user_model().objects.create(
+            username="admin",
+            is_staff=True
+        )
+        operation = Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z",
+                                             created_by=admin_user)
+        operation.operations_attendees.add(OperationsAttendees.objects.create(operation=operation, attendee=admin_user))
+        admin_user.delete()
+        operation.refresh_from_db()
+        print(operation.created_by.deleted)
+        print(operation.operations_attendees.all()[0].attendee)
+        operation.delete()
+        print(admin_user.created_operations.all())
+        operation.delete(True)
+
 
 
 
