@@ -24,13 +24,7 @@ class GetRetrieve(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = LinkViewSet.as_view({'get': 'list'}, application='sar')
-
-    def getRequest(self, user, payload=""):
-        factory = APIRequestFactory()
-        request = factory.get(payload)
-        force_authenticate(request, user=user, token=user.token)
-        return request
+        self.view = LinkViewSet.as_view({'get': 'list'})
 
     def test_basic_list(self):
         self.createdModels = {"operations": []}
@@ -53,7 +47,7 @@ class GetRetrieve(BaseApiTest):
             )
         )
 
-        response = self.view(self.getRequest(self.admin_user), id=str(self.admin_user.id), Model="users", Link="created_operations")
+        response = self.view(self.get_request('get', self.admin_user), id=str(self.admin_user.id), Model="users", Link="created_operations")
 
         assert response.data["count"] == 3
         for message in self.createdModels['operations']:
@@ -76,7 +70,7 @@ class GetRetrieve(BaseApiTest):
             type="bambi", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z",
             created_by=self.admin_user
         )
-        response = self.view(self.getRequest(self.regular_user, '?filter={"type": "flood"}'), id=str(self.admin_user.id), Model="users", Link="created_operations")
+        response = self.view(self.get_request('get', user=self.regular_user, query_parameters='?filter={"type": "flood"}'), id=str(self.admin_user.id), Model="users", Link="created_operations")
         assert response.data["count"] == 1
         for message in self.createdModels['operations']:
             assert [x["id"] for x in response.data['results']].index(str(message.id)) >= 0
@@ -87,14 +81,7 @@ class GetRetrieve(BaseApiTest):
 class PostAdd(BaseApiTest):
     def setUp(self):
         super().setUp()
-        self.view = LinkViewSet.as_view({'post': 'add'}, application='sar')
-
-    def getRequest(self, user, payload=None):
-        factory = APIRequestFactory()
-        request = factory.post("", payload, format="json")
-        force_authenticate(request, user=user, token=user.token)
-        return request
-
+        self.view = LinkViewSet.as_view({'post': 'add'})
 
     def test_add(self):
         operation = Operation.objects.create(
@@ -104,9 +91,10 @@ class PostAdd(BaseApiTest):
         payload = {
             "ids": [str(operation.id)],
         }
-        request = self.getRequest(
-            self.admin_user,
-            payload
+        request = self.get_request(
+            'post',
+            user=self.admin_user,
+            payload=payload
         )
         assert self.admin_user.created_operations.count() == 0
         response = self.view(request, id=str(self.admin_user.id), Model="users", Link="created_operations")
@@ -121,9 +109,10 @@ class PostAdd(BaseApiTest):
         payload = {
             "ids": [str(self.admin_user.id)],
         }
-        request = self.getRequest(
-            self.admin_user,
-            payload
+        request = self.get_request(
+            'post',
+            user=self.admin_user,
+            payload=payload
         )
         assert self.admin_user.created_operations.count() == 0
         response = self.view(request, id=str(self.admin_user.id), Model="users", Link="created_operations")
@@ -136,13 +125,7 @@ class DeleteRemove(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = LinkViewSet.as_view({'delete': 'remove'}, application='sar')
-
-    def getRequest(self, user, payload=None):
-        factory = APIRequestFactory()
-        request = factory.delete("", payload, format="json")
-        force_authenticate(request, user=user, token=user.token)
-        return request
+        self.view = LinkViewSet.as_view({'delete': 'remove'})
 
     def test_delete(self):
         operation = Operation.objects.create(
@@ -154,9 +137,10 @@ class DeleteRemove(BaseApiTest):
         payload = {
             "ids": [str(operation.id)],
         }
-        request = self.getRequest(
-            self.admin_user,
-            payload
+        request = self.get_request(
+            'delete',
+            user=self.admin_user,
+            payload=payload
         )
         response = self.view(request, id=str(self.admin_user.id), Model="users", Link="created_operations")
         assert response.status_code == 200
@@ -170,9 +154,10 @@ class DeleteRemove(BaseApiTest):
         payload = {
             "ids": [str(self.admin_user.id)],
         }
-        request = self.getRequest(
-            self.admin_user,
-            payload
+        request = self.get_request(
+            'delete',
+            user=self.admin_user,
+            payload=payload
         )
         assert self.admin_user.created_operations.count() == 0
         response = self.view(request, id=str(self.admin_user.id), Model="users", Link="created_operations")

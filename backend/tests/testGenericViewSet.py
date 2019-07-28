@@ -55,18 +55,20 @@ class BaseApiTest(APITestCase):
         self.admin_user.token = self.create_token(self.admin_user)
         self.regular_user.token = self.create_token(self.regular_user)
 
+    @staticmethod
+    def get_request(method, user=None, query_parameters="", payload=None, format="json"):
+        factory = APIRequestFactory()
+        request = getattr(factory, method)(query_parameters, payload, format=format)
+        if user:
+            force_authenticate(request, user=user, token=user.token)
+        return request
+
 
 class GetList(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'get': 'list'}, application='sar')
-    
-    def getRequest(self, user, payload=""):
-        factory = APIRequestFactory()
-        request = factory.get(payload)
-        force_authenticate(request, user=user, token=user.token)
-        return request
+        self.view = GenericViewSet.as_view({'get': 'list'})
 
     def test_basic_list(self):
         self.createdModels = {"operations": []}
@@ -74,19 +76,18 @@ class GetList(BaseApiTest):
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
 
-        response = self.view(self.getRequest(self.admin_user), Model="Operations")
+        response = self.view(self.get_request('get', user=self.admin_user), Model="Operations")
 
         assert response.data["count"] == 3
         for message in self.createdModels['operations']:
             assert [x["id"] for x in response.data['results']].index(str(message.id)) >= 0
-
 
     def test_filter(self):
         self.createdModels = {"operations": []}
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
         Operation.objects.create(type="bambi", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
-        response = self.view(self.getRequest(self.regular_user, '?filter={"type": "flood"}'), Model="Operations")
+        response = self.view(self.get_request('get', user=self.regular_user, query_parameters='?filter={"type": "flood"}'), Model="Operations")
         assert response.data["count"] == 2
         for message in self.createdModels['operations']:
             assert [x["id"] for x in response.data['results']].index(str(message.id)) >= 0
@@ -96,13 +97,7 @@ class PostCreate(BaseApiTest):
     
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'post': 'create'}, application='sar')
-
-    def getRequest(self, user, payload=None):
-        factory = APIRequestFactory()
-        request = factory.post("", payload, format="json")
-        force_authenticate(request, user=user, token=user.token)
-        return request
+        self.view = GenericViewSet.as_view({'post': 'create'})
     
     def test_basic_create(self):
         payload = {
@@ -110,9 +105,10 @@ class PostCreate(BaseApiTest):
                 "type": "flood",
                 "start_date" : "2019-04-06T14:43:56.630468Z"
             }
-        request = self.getRequest(
-            self.admin_user,
-            payload
+        request = self.get_request(
+            'post',
+            user=self.admin_user,
+            payload=payload
         )
         response = self.view(request, Model="Operations")
         message = Operation.objects.get(id=response.data['id'])
@@ -124,23 +120,18 @@ class PutUpdate(BaseApiTest):
     
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'put': 'update', "patch": "patch"}, application='sar')
-    
-    def getRequest(self, user, payload=None):
-        factory = APIRequestFactory()
-        request = factory.patch("", payload, format="json")
-        force_authenticate(request, user=user, token=user.token)
-        return request
-    
+        self.view = GenericViewSet.as_view({'put': 'update', "patch": "patch"})
+
     def test_basic_update(self):
         message = Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
 
         payload = {
                 "name": "FirstOperation2",
             }
-        request = self.getRequest(
-            self.admin_user,
-            payload
+        request = self.get_request(
+            'patch',
+            user=self.admin_user,
+            payload=payload
         )
         response = self.view(request, Model="Operations", id=str(message.id))
 
@@ -156,19 +147,14 @@ class GetRetrieve(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'get': 'retrieve'}, application='sar')
-    
-    def getRequest(self, user):
-        factory = APIRequestFactory()
-        request = factory.get("")
-        force_authenticate(request, user=user, token=user.token)
-        return request
-    
+        self.view = GenericViewSet.as_view({'get': 'retrieve'})
+
     def test_basic_retrieve(self):
         message = Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
 
-        request = self.getRequest(
-            self.admin_user,
+        request = self.get_request(
+            'get',
+            user=self.admin_user,
         )
         response = self.view(request, Model="Operations", id=str(message.id))
         
@@ -181,19 +167,15 @@ class DeleteDestroy(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'delete': 'destroy'}, application='sar')
+        self.view = GenericViewSet.as_view({'delete': 'destroy'})
 
-    def getRequest(self, user):
-        factory = APIRequestFactory()
-        request = factory.delete("")
-        force_authenticate(request, user=user, token=user.token)
-        return request
 
     def test_basic_delete(self):
         message = Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
 
-        request = self.getRequest(
-            self.admin_user,
+        request = self.get_request(
+            'delete',
+            user=self.admin_user,
         )
         response = self.view(request, Model="Operations", id=str(message.id))
         assert response.data is None
