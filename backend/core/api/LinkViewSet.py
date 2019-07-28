@@ -36,7 +36,7 @@ class LinkViewSet(GenericViewSet):
         return self.get_parent_set().all()
 
     def get_serializer_class(self):
-        return self.model.api_controller.get_serializer()
+        return self.model.api_controller.get_serializer(view=self)
 
     def remove(self, request, *args, **kwargs):
         errors = {}

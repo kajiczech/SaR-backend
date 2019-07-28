@@ -93,5 +93,5 @@ class User(AbstractUser, BaseModel):
         super().save(*args, **kwargs)
 
 
-User.api_controller = BaseApiController(model=User)
+User.api_controller = BaseApiController(model=User, hidden_fields=['password'])
 

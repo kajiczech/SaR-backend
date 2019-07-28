@@ -48,7 +48,7 @@ class GenericViewSet(viewsets.ModelViewSet):
         return found_model
 
     def get_serializer_class(self):
-        return self.model.api_controller.get_serializer()
+        return self.model.api_controller.get_serializer(view=self)
 
     def create(self, request, *args, **kwargs):
         """

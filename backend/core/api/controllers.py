@@ -4,19 +4,22 @@ from rest_framework.utils import model_meta
 
 class BaseApiController:
     # Which fields are not returned in serialization
-    private_fields = []
+    hidden_fields = []
 
-    def __init__(self, model, private_fields=None, url_name=None):
-        self.private_fields = private_fields or []
+    def __init__(self, model, hidden_fields=None, url_name=None):
+        self.hidden_fields = hidden_fields or []
         self.url_name = url_name
         self.model = model
 
-    def get_serializer(self, fields_to_serialize=None):
+    def get_serializer(self, view=None, fields_to_serialize=None):
         if fields_to_serialize is None:
             fields_to_serialize = self.get_field_names_for_serializer(self.model)
 
         # Make sure private fields are never fetched
-        fields_to_serialize = [item for item in fields_to_serialize if item not in self.private_fields]
+        if not view:
+            fields_to_serialize = [item for item in fields_to_serialize if item not in self.hidden_fields]
+        elif view.action == 'list' or view.action == 'retrieve':
+            fields_to_serialize = [item for item in fields_to_serialize if item not in self.hidden_fields]
 
         class BaseSerializer(serializers.ModelSerializer):
             class Meta:
