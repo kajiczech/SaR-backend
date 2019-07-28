@@ -1,7 +1,6 @@
 from django.db import models
-from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor
 
-from backend.core.managers import BaseManager
+from backend.core.api.controllers import BaseApiController
 from backend.core.models import BaseModel, StringEnum
 from django.contrib.auth import get_user_model
 
@@ -52,6 +51,9 @@ class Operation(BaseModel):
     attendees = models.ManyToManyField(get_user_model(), related_name="operations", through='OperationsAttendees')
 
 
+Operation.api_controller = BaseApiController(Operation)
+
+
 class AttendeeRoles(StringEnum):
     organizer = "Organizer"
     scout = 'Scout'
@@ -81,6 +83,9 @@ class OperationsAttendees(BaseModel):
             operation = Operation.get_serializer()()
 
         return BaseSerializer
+
+
+OperationsAttendees.api_controller = BaseApiController(OperationsAttendees, url_name='operationsattendees')
 
 
 class GeotagStatuses(StringEnum):
@@ -129,6 +134,9 @@ class Geotag(BaseModel):
     altitude =          models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
 
 
+Geotag.api_controller = BaseApiController(Geotag)
+
+
 class GeofenceTypes(StringEnum):
     coordinates = "Coordinates"
 
@@ -164,6 +172,9 @@ class Geofence(BaseModel):
     coordinates =       models.TextField(blank=True, null=True)
 
 
+Geofence.api_controller = BaseApiController(Geofence)
+
+
 class CheckedPointTypes(StringEnum):
     drone = "Drone"
     mobile = "Mobile"
@@ -186,6 +197,9 @@ class CheckedPoint(BaseModel):
     radius =            models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
     latitude =          models.DecimalField(max_digits=9, decimal_places=6)
     longitude =         models.DecimalField(max_digits=9, decimal_places=6)
+
+
+CheckedPoint.api_controller = BaseApiController(CheckedPoint)
 
 
 class InvitationStatuses(StringEnum):
@@ -213,3 +227,6 @@ class Invitation(BaseModel):
         choices=[(a.name, a.value) for a in InvitationStatuses],
         default=InvitationStatuses.open
     )
+
+
+Invitation.api_controller = BaseApiController(Invitation)

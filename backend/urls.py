@@ -47,27 +47,25 @@ urlpatterns = [
             # This has to be here because the POST cannot be redirected (from endpoint without slash to endpoint with slash)
 
             re_path(r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)$',
-                GenericViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy', 'patch': 'patch'}, application="sar")),
+                GenericViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy', 'patch': 'patch'})),
 
             re_path(r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)/$',
-                GenericViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy', 'patch': 'patch'}, application="sar")),
+                GenericViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy', 'patch': 'patch'})),
 
 
             re_path(r'^(?P<Model>[A-Za-z_-]+)$',
-                GenericViewSet.as_view({'get': 'list', 'post': 'create', }, application="sar")),
+                GenericViewSet.as_view({'get': 'list', 'post': 'create', })),
             re_path(r'^(?P<Model>[A-Za-z_-]+)/$',
-                GenericViewSet.as_view({'get': 'list', 'post': 'create'}, application="sar")),
+                GenericViewSet.as_view({'get': 'list', 'post': 'create'})),
 
             re_path(
                 r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)/link/(?P<Link>[A-Za-z-_]+)$',
-                LinkViewSet.as_view({'get': 'list', 'post': "add",  'delete': 'remove'},
-                application="sar")
+                LinkViewSet.as_view({'get': 'list', 'post': "add",  'delete': 'remove'})
             ),
 
             re_path(
                 r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)/link/(?P<Link>[A-Za-z-_]+)/$',
-                LinkViewSet.as_view({'get': 'list', 'post': "add", 'delete': 'remove'},
-                application="sar")
+                LinkViewSet.as_view({'get': 'list', 'post': "add", 'delete': 'remove'})
             ),
 
 

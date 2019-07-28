@@ -74,7 +74,7 @@ class GetList(BaseApiTest):
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
 
-        response = self.view(self.getRequest(self.admin_user), Model="Operation")
+        response = self.view(self.getRequest(self.admin_user), Model="Operations")
 
         assert response.data["count"] == 3
         for message in self.createdModels['operations']:
@@ -86,7 +86,7 @@ class GetList(BaseApiTest):
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
         Operation.objects.create(type="bambi", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
-        response = self.view(self.getRequest(self.regular_user, '?filter={"type": "flood"}'), Model="Operation")
+        response = self.view(self.getRequest(self.regular_user, '?filter={"type": "flood"}'), Model="Operations")
         assert response.data["count"] == 2
         for message in self.createdModels['operations']:
             assert [x["id"] for x in response.data['results']].index(str(message.id)) >= 0
@@ -114,7 +114,7 @@ class PostCreate(BaseApiTest):
             self.admin_user,
             payload
         )
-        response = self.view(request, Model="Operation")
+        response = self.view(request, Model="Operations")
         message = Operation.objects.get(id=response.data['id'])
         assert message.name == "FirstOperation"
         assert message.type == "flood"
@@ -142,7 +142,7 @@ class PutUpdate(BaseApiTest):
             self.admin_user,
             payload
         )
-        response = self.view(request, Model="Operation", id=str(message.id))
+        response = self.view(request, Model="Operations", id=str(message.id))
 
         assert response.status_code == 200
         assert response.data['id'] == str(message.id)
@@ -170,7 +170,7 @@ class GetRetrieve(BaseApiTest):
         request = self.getRequest(
             self.admin_user,
         )
-        response = self.view(request, Model="Operation", id=str(message.id))
+        response = self.view(request, Model="Operations", id=str(message.id))
         
         assert response.status_code == 200
         assert response.data['name'] == "FirstOperation"
@@ -195,6 +195,6 @@ class DeleteDestroy(BaseApiTest):
         request = self.getRequest(
             self.admin_user,
         )
-        response = self.view(request, Model="Operation", id=str(message.id))
+        response = self.view(request, Model="Operations", id=str(message.id))
         assert response.data is None
         assert response.status_code == 204

@@ -53,7 +53,7 @@ class GetRetrieve(BaseApiTest):
             )
         )
 
-        response = self.view(self.getRequest(self.admin_user), id=str(self.admin_user.id), Model="user", Link="created_operations")
+        response = self.view(self.getRequest(self.admin_user), id=str(self.admin_user.id), Model="users", Link="created_operations")
 
         assert response.data["count"] == 3
         for message in self.createdModels['operations']:
@@ -76,7 +76,7 @@ class GetRetrieve(BaseApiTest):
             type="bambi", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z",
             created_by=self.admin_user
         )
-        response = self.view(self.getRequest(self.regular_user, '?filter={"type": "flood"}'), id=str(self.admin_user.id), Model="user", Link="created_operations")
+        response = self.view(self.getRequest(self.regular_user, '?filter={"type": "flood"}'), id=str(self.admin_user.id), Model="users", Link="created_operations")
         assert response.data["count"] == 1
         for message in self.createdModels['operations']:
             assert [x["id"] for x in response.data['results']].index(str(message.id)) >= 0
@@ -109,7 +109,7 @@ class PostAdd(BaseApiTest):
             payload
         )
         assert self.admin_user.created_operations.count() == 0
-        response = self.view(request, id=str(self.admin_user.id), Model="user", Link="created_operations")
+        response = self.view(request, id=str(self.admin_user.id), Model="users", Link="created_operations")
         assert response.status_code == 200
         assert self.admin_user.created_operations.count() == 1
 
@@ -126,7 +126,7 @@ class PostAdd(BaseApiTest):
             payload
         )
         assert self.admin_user.created_operations.count() == 0
-        response = self.view(request, id=str(self.admin_user.id), Model="user", Link="created_operations")
+        response = self.view(request, id=str(self.admin_user.id), Model="users", Link="created_operations")
         assert response.status_code == 400
         assert self.admin_user.created_operations.count() == 0
         assert response.data['errors'][str(self.admin_user.id)]
@@ -158,7 +158,7 @@ class DeleteRemove(BaseApiTest):
             self.admin_user,
             payload
         )
-        response = self.view(request, id=str(self.admin_user.id), Model="user", Link="created_operations")
+        response = self.view(request, id=str(self.admin_user.id), Model="users", Link="created_operations")
         assert response.status_code == 200
         assert self.admin_user.created_operations.count() == 0
 
@@ -175,7 +175,7 @@ class DeleteRemove(BaseApiTest):
             payload
         )
         assert self.admin_user.created_operations.count() == 0
-        response = self.view(request, id=str(self.admin_user.id), Model="user", Link="created_operations")
+        response = self.view(request, id=str(self.admin_user.id), Model="users", Link="created_operations")
         assert response.status_code == 400
         assert self.admin_user.created_operations.count() == 0
         assert response.data['errors'][str(self.admin_user.id)]

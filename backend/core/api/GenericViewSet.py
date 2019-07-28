@@ -17,22 +17,38 @@ class GenericViewSet(viewsets.ModelViewSet):
     application = None
     model: BaseModel = None
     lookup_field = 'id'
-    
-    def __init__(self, application, **kwargs):
-        self.application = application
-        super(GenericViewSet, self).__init__(**kwargs)
 
     def initialize_request(self, request, *args, **kwargs):
-        if self.kwargs['Model'] == 'user':
-            self.model = get_user_model()
-        else:
-            self.model = apps.get_model(self.application, self.kwargs['Model'])
+        self.model = self.get_model(kwargs['Model'])
         self.queryset = self.model.objects
         request = super().initialize_request(request, *args, **kwargs)
         return request
 
+    @staticmethod
+    def get_model(model_name_plural):
+        found_model = None
+        for model in apps.get_models():
+            if not issubclass(model, BaseModel):
+                continue
+            """
+            @var model BaseModel
+            """
+            plural_name_lowercase = model.api_controller.get_url_name()
+            if plural_name_lowercase == model_name_plural.lower():
+                found_model = model
+                break
+
+        if not found_model:
+            raise LookupError(
+                "Could not find model by its plural name " + model_name_plural)
+        if not issubclass(found_model, BaseModel):
+            raise LookupError(
+                "Model is not instance of BaseModel")
+
+        return found_model
+
     def get_serializer_class(self):
-        return self.model.get_serializer()
+        return self.model.api_controller.get_serializer()
 
     def create(self, request, *args, **kwargs):
         """

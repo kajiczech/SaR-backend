@@ -2,13 +2,10 @@ import enum
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models.manager import ManagerDescriptor
-from rest_framework import viewsets, serializers, permissions, generics
-
-from backend.core.managers import *
-from rest_framework.utils import html, model_meta, representation
 
 import uuid
+
+from backend.core.api.controllers import BaseApiController
 
 
 class StringEnum(enum.Enum):
@@ -27,58 +24,57 @@ class BaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date_entered = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    deleted = models.IntegerField(default=0)
 
-    objects = BaseManager()
-    private_fields = []
-
-    @classmethod
-    def get_serializer(cls, fields_to_serialize=None):
-        if fields_to_serialize is None:
-            fields_to_serialize = cls.get_field_names_for_serializer()
-
-        # Make sure private fields are never fetched
-        fields_to_serialize = [item for item in fields_to_serialize if item not in cls.private_fields]
-
-        class BaseSerializer(serializers.ModelSerializer):
-            class Meta:
-                model = cls
-                fields = fields_to_serialize
-        return BaseSerializer
+    api_controller = None
 
     class Meta:
         abstract = True
         ordering = ['-date_modified']
 
-    def delete(self, from_db=False, using=None, keep_parents=False):
-        # TODO Before and after delete logic
+class Role(BaseModel):
+    Name =      models.CharField(max_length=31, blank=True, null=True)
 
-        if from_db:
-            super(BaseModel, self).delete(using, keep_parents)
-            return
-        self.deleted = 1
-        self.save()
 
-    @classmethod
-    def get_implicit_filter(cls, user):
+Role.api_controller = BaseApiController(model=Role)
 
-        return {}
 
-    @classmethod
-    def get_field_names_for_serializer(cls):
-        """Taken from Serializers.ModelSerializer, because model.get_fields returns some additional fields"""
-        model_info = model_meta.get_field_info(cls)
-        """
-        Return the default list of field names that will be used if the
-        `Meta.fields` option is not specified.
-        """
-        return (
-            [model_info.pk.name] +
-            list(model_info.fields) +
-            list(model_info.forward_relations)
-        )
+class AccessLevels(StringEnum):
+    none = 'none'
+    owner = 'owner'
+    shared = 'shared'
+    admin = 'admin'
+
+
+class RoleViewPermission(BaseModel):
+    model =                     models.CharField(max_length=31, blank=True, null=True)
+    application =               models.CharField(max_length=31, blank=True, null=True)
+    access_level =              models.CharField(
+        max_length=31,
+        choices=[(a.name, a.value) for a in AccessLevels],
+        default=AccessLevels.owner
+    )
+
+
+RoleViewPermission.api_controller = BaseApiController(model=RoleViewPermission)
+
+
+class RoleActionPermission(BaseModel):
+    model =                     models.CharField(max_length=31, blank=True, null=True)
+    application =               models.CharField(max_length=31, blank=True, null=True)
+    access_level =              models.CharField(
+        max_length=31,
+        choices=[(a.name, a.value) for a in AccessLevels],
+        default=AccessLevels.owner
+    )
+
+
+RoleActionPermission.api_controller = BaseApiController(model=RoleActionPermission)
 
 
 class User(AbstractUser, BaseModel):
 
-    private_fields = ["password"]
+    roles = models.ManyToManyField(Role, "users")
+
+
+User.api_controller = BaseApiController(model=User, private_fields=["password"])
+
