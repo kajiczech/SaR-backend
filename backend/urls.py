@@ -26,6 +26,9 @@ from backend.core.api.LinkViewSet import LinkViewSet
 from backend.core.api.GenericViewSet import GenericViewSet
 from oauth2_provider import urls
 from oauth2_provider import views
+
+from backend.core.api.endpoints import MeView
+
 admin.autodiscover()
 
 
@@ -44,6 +47,8 @@ urlpatterns = [
             re_path(r"^oauth2/revoke_token$", views.RevokeTokenView.as_view(), name="revoke-token"),
             re_path(r"^oauth2/introspect$", views.IntrospectTokenView.as_view(), name="introspect"),
 
+            re_path(r'^me$', MeView.as_view({'get': 'me'})),
+            re_path(r'^me/$', MeView.as_view({'get': 'me'})),
 
             # This has to be here because the POST cannot be redirected (from endpoint without slash to endpoint with slash)
 
