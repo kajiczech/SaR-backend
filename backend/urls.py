@@ -21,6 +21,7 @@ from rest_framework import generics, permissions, serializers, views
 
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 
+from backend.core.api import authorization
 from backend.core.api.LinkViewSet import LinkViewSet
 from backend.core.api.GenericViewSet import GenericViewSet
 from oauth2_provider import urls
@@ -39,7 +40,7 @@ urlpatterns = [
             re_path(r'^oauth2/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
             re_path(r"^oauth2/authorize$", views.AuthorizationView.as_view(), name="authorize"),
-            re_path(r"^oauth2/token$", views.TokenView.as_view(), name="token"),
+            re_path(r"^oauth2/token$", authorization.TokenView.as_view(), name="token"),
             re_path(r"^oauth2/revoke_token$", views.RevokeTokenView.as_view(), name="revoke-token"),
             re_path(r"^oauth2/introspect$", views.IntrospectTokenView.as_view(), name="introspect"),
 

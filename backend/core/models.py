@@ -78,6 +78,8 @@ class User(AbstractUser, BaseModel):
     roles = models.ManyToManyField(Role, "users", blank=True)
     #     Overriding password, so it can be blank
     password = models.CharField(_('password'), max_length=128, blank=True, null=True)
+    #     Overiding email, making it unique
+    email = models.EmailField(_('email address'), blank=True, null=True, unique=True)
 
     def save(self, *args, **kwargs):
         # Update password only when it is changed, so we don't hash hashed password
