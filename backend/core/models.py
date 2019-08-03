@@ -19,7 +19,7 @@ class StringEnum(enum.Enum):
         return self.name
 
     def __eq__(self, other):
-        return repr(self.value) == repr(other)
+        return str(self.name) == str(other)
 
 
 class BaseModel(models.Model):

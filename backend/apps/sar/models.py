@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.db import models
 
 from backend.core.api.controllers import BaseApiController, ManyToManyController
@@ -58,6 +59,7 @@ class AttendeeRoles(StringEnum):
     organizer = "Organizer"
     scout = 'Scout'
     resolver = "Resolver"
+    undefined = "Undefined"
 
 
 class OperationsAttendees(BaseModel):
@@ -217,6 +219,22 @@ class Invitation(BaseModel):
         choices=[(a.name, a.value) for a in InvitationStatuses],
         default=InvitationStatuses.open
     )
+
+    def save(self, *args, **kwargs):
+        new_status = None
+        try:
+            saved = Invitation.objects.get(pk=self.pk)
+            if self.status != saved.status:
+                new_status = self.status
+        except (Invitation.DoesNotExist, ValueError):
+            new_status = self.status
+
+        if new_status and self.status == InvitationStatuses.accepted:
+            self.link_invitee_to_operation()
+
+    def link_invitee_to_operation(self):
+        role = AttendeeRoles.organizer if self.type == InvitationTypes.organizer else AttendeeRoles.undefined
+        OperationsAttendees.objects.create(attendee=self.invitee, operation=self.operation, attendee_role=role)
 
 
 Invitation.api_controller = BaseApiController(Invitation)
