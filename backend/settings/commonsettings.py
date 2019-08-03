@@ -102,7 +102,7 @@ try:
         }
     }
 #Don't throw error when environ is not set - the database might be set up differently somewhere else
-Except KeyError:
+except KeyError:
     pass
 
 
