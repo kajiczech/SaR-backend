@@ -1,6 +1,6 @@
 from django.db import models
 
-from backend.core.api.controllers import BaseApiController
+from backend.core.api.controllers import BaseApiController, ManyToManyController
 from backend.core.models import BaseModel, StringEnum
 from django.contrib.auth import get_user_model
 
@@ -71,21 +71,11 @@ class OperationsAttendees(BaseModel):
     attendee_role = models.CharField(
         max_length=31,
         choices=[(a.name, a.value) for a in AttendeeRoles],
-        default=AttendeeRoles.resolver
     )
 
-    @classmethod
-    def get_serializer(cls, fields_to_serialize=None):
-        serializer = super().get_serializer(fields_to_serialize)
 
-        class BaseSerializer(serializer):
-            attendee = get_user_model().get_serializer()()
-            operation = Operation.get_serializer()()
-
-        return BaseSerializer
-
-
-OperationsAttendees.api_controller = BaseApiController(OperationsAttendees, url_name='operationsattendees')
+OperationsAttendees.api_controller = ManyToManyController(OperationsAttendees, 'attendee', get_user_model(),
+                                                          'operation',  Operation, url_name='operationsattendees')
 
 
 class GeotagStatuses(StringEnum):

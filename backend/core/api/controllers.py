@@ -66,3 +66,35 @@ class AssignableApiController(BaseApiController):
                 filter_def[self.assignment_field] = user.id
 
         return filter_def
+
+
+class ManyToManyController(BaseApiController):
+
+    def __init__(self, model, first_link, first_model, second_link, second_model, *args, **kwargs):
+        self.first_link = first_link
+        self.second_link = second_link
+
+        # We could do it like this if we didn't loaded the controllers before the models are loaded - this throws AppRegistryException
+        # self.first_model = model._meta.get_field(first_link).related_model
+        # self.second_model = model._meta.get_field(second_link).related_model
+
+        self.first_model = first_model
+        self.second_model = second_model
+
+        super().__init__(model, *args, **kwargs)
+
+    def get_serializer(self, view=None, fields_to_serialize=None):
+        serializer = super().get_serializer(view=view, fields_to_serialize=fields_to_serialize)
+        serializer.attendee = self.first_model.api_controller.get_serializer()()
+        serializer.operation = self.second_model.api_controller.get_serializer()()
+
+        # We need to create the class like this, because the fields are registered upon class creation
+        #        # BaseSerializer._declared_fields[self.first_link] = serializer()
+        # would also work. Still has not decided what is less ugly
+
+        BaseSerializer = type('BaseSerializer', (serializer,), {
+            self.first_link: self.first_model.api_controller.get_serializer()(),
+            self.second_link: self.second_model.api_controller.get_serializer()()
+        })
+
+        return BaseSerializer
