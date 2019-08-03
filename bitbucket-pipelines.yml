@@ -22,7 +22,7 @@ pipelines:
                 name: Deploy
                 deployment: production
                 script:
-                    - ssh ${DEPLOY_USER}@${MASTER_SERVER} -A "cd ${STACK_FOLDER}${SRC_FOLDER}; git fetch;"
+                    - ssh ${DEPLOY_USER}@${MASTER_SERVER} "cd ${STACK_FOLDER}${SRC_FOLDER}; git fetch;"
                     - ssh ${DEPLOY_USER}@${MASTER_SERVER} "cd ${STACK_FOLDER}${SRC_FOLDER}; git reset origin/master --hard"
                     - ssh ${DEPLOY_USER}@${MASTER_SERVER} "cd ${STACK_FOLDER}${COMPOSE_FOLDER}; docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"\$PWD:/\$PWD\" -w=\"/\$PWD\" docker/compose:1.13.0 restart ${DOCKER_IMAGE}"
 
