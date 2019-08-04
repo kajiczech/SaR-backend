@@ -105,7 +105,6 @@ try:
 except KeyError:
     pass
 
-
 LOGGING = {
     'version': 1,
     'formatters': {
