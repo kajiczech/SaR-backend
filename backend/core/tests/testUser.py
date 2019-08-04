@@ -1,19 +1,13 @@
 from oauth2_provider import views
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
-from django.contrib.auth.models import User
 
-from backend.apps.sar.models import *
 from backend.core.api.GenericViewSet import GenericViewSet
-from rest_framework.test import APITestCase
-from datetime import timedelta
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from oauth2_provider.models import get_application_model
 from oauth2_provider.models import get_access_token_model
-from decimal import *
 
-from backend.tests.testGenericViewSet import BaseApiTest
+from backend.core.tests.testGenericViewSet import BaseApiTest
 
 Application = get_application_model()
 AccessToken = get_access_token_model()

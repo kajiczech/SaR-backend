@@ -1,6 +1,6 @@
 from backend.apps.sar.models import *
 from backend.core.api.GenericViewSet import GenericViewSet
-from backend.tests.testGenericViewSet import BaseApiTest
+from backend.core.tests.testGenericViewSet import BaseApiTest
 
 
 class TestManyToManyController(BaseApiTest):

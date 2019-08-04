@@ -17,10 +17,12 @@ Application = get_application_model()
 AccessToken = get_access_token_model()
 UserModel = get_user_model()
 
+# TODO: Create some test models, don't use ones from a different application
+# https://stackoverflow.com/questions/502916/django-how-to-create-a-model-dynamically-just-for-testing
 
 class BaseApiTest(APITestCase):
 
-    def create_applicatioin(self):
+    def create_application(self):
         self.app = Application.objects.create(
             client_type=Application.CLIENT_PUBLIC,
             authorization_grant_type=Application.GRANT_PASSWORD,
@@ -51,7 +53,7 @@ class BaseApiTest(APITestCase):
             username="regular",
             is_staff=False
         )
-        self.create_applicatioin()
+        self.create_application()
         self.admin_user.token = self.create_token(self.admin_user)
         self.regular_user.token = self.create_token(self.regular_user)
 
@@ -76,7 +78,7 @@ class GetList(BaseApiTest):
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
         self.createdModels['operations'].append(Operation.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
 
-        response = self.view(self.get_request('get', user=self.admin_user), Model="Operations")
+        response = self.view(self.get_request('get', user=self.admin_user), Model="operations")
 
         assert response.data["count"] == 3
         for message in self.createdModels['operations']:
