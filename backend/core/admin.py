@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
+from django.contrib.auth.forms import UserCreationForm, AdminPasswordChangeForm
 
 from .models import *
 
@@ -22,9 +23,28 @@ register_model(RoleActionPermission)
 register_model(RoleViewPermission)
 
 
-# Special handling for user model, so it correctly saved password
+# Special handling for user model, so it correctly saves a password
+class UserCreationOverrideForm(UserCreationForm):
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.password = self.cleaned_data["password1"]
+        if commit:
+            user.save()
+        return user
+
+
+class AdminPasswordChangeOverrideForm(AdminPasswordChangeForm):
+    def save(self, commit=True):
+        password = self.cleaned_data["password1"]
+        self.user.password = password
+        if commit:
+            self.user.save()
+        return self.user
+
+
 class UserAdmin(auth_admin.UserAdmin):
-    pass
+    add_form = UserCreationOverrideForm
+    change_password_form = AdminPasswordChangeOverrideForm
 
 
 admin.site.register(User, UserAdmin)
