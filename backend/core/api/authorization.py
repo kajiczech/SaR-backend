@@ -8,19 +8,38 @@ class TokenView(views.TokenView):
 
     def create_token_response(self, request):
 
+        # In some requests, the token is in request.POST, in others in request.GET
         try:
-            email = request.GET.copy().pop('email')[0]
-            user = get_user_model().objects.get(email=email)
-            self.change_email_to_username(request, user.username)
-        except (KeyError, get_user_model().DoesNotExist):
-            pass
+            post_data = request.POST.copy()
+            email = post_data.pop('email')[0]
+            try:
+                user = get_user_model().objects.get(email=email)
+                username = user.username
+            except get_user_model().DoesNotExist:
+                username = ''
+
+            post_data["username"] = username
+            request.POST = post_data
+        except KeyError:
+            try:
+                email = request.GET.copy().pop('email')[0]
+
+                try:
+                    user = get_user_model().objects.get(email=email)
+                    username = user.username
+                except get_user_model().DoesNotExist:
+                    username = ''
+
+                self.change_email_to_username(request, username)
+            except KeyError:
+                pass
 
         return super().create_token_response(request)
 
     @staticmethod
     def change_email_to_username(request, username):
         """
-        Parameters used for request are for some reason stored in request.META['QUERY_STRING'] which is just url
+        Parameters used for request are for some reason used from request.META['QUERY_STRING'] which is just url
         query string, we need to parse it, and replace email with username
         """
         a = []
