@@ -3,7 +3,6 @@ from django.test import TestCase
 
 from backend.apps.sar.models import *
 
-
 class TestInvitation(TestCase):
 
     def test_basic_invitation(self):
