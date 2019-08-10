@@ -13,13 +13,13 @@ class GenericViewSet(viewsets.ModelViewSet):
     
     filter_backends = [RequestFilter, ImplicitFilter]
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope, IsAssignedUser]
-    
     application = None
     model: BaseModel = None
     lookup_field = 'id'
 
     def initialize_request(self, request, *args, **kwargs):
-        self.model = self.get_model(kwargs['Model'])
+        if not self.model:
+            self.model = self.get_model(kwargs['Model'])
         self.queryset = self.model.objects
         request = super().initialize_request(request, *args, **kwargs)
         return request

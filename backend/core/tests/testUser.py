@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from oauth2_provider.models import get_application_model
 from oauth2_provider.models import get_access_token_model
 
+from backend.core.api.endpoints import RegisterUserView, MeView
 from backend.core.tests.testGenericViewSet import BaseApiTest
 
 Application = get_application_model()
@@ -20,8 +21,8 @@ class TestUserCreateAndUpdate(BaseApiTest):
         super().setUp()
         self.oauth2_view = views.TokenView.as_view()
         self.generic_view = self.view = GenericViewSet.as_view({'post': 'create', "put": "update"})
-    
-
+        self.user_create_view = RegisterUserView.as_view({'post': "register_user"})
+        self.me_view = MeView.as_view({'get': "me"})
 
     def get_put_request(self, user=None, query_parameters=None, payload=None):
         factory = APIRequestFactory()
@@ -35,7 +36,6 @@ class TestUserCreateAndUpdate(BaseApiTest):
             "username": "test",
             "password": "test"
         }
-
         created_user = self.generic_view(self.get_request('post', user=self.admin_user, payload=payload), Model="users")
         assert created_user.status_code == 201
 
@@ -69,3 +69,19 @@ class TestUserCreateAndUpdate(BaseApiTest):
         response = self.oauth2_view(self.get_request('post', query_parameters=oauth_payload), name='token')
 
         assert response.status_code == 200
+
+    def testUserRegister(self):
+        response = self.user_create_view(self.get_request('post', payload={
+            "username": "test",
+            "password": "test",
+            "email": "test@test.com"
+        }))
+
+        assert response.status_code == 201
+        user = get_user_model().objects.get(username="test")
+        assert user.email == "test@test.com"
+
+    def testMe(self):
+        response = self.me_view(self.get_request('get', self.admin_user))
+        assert response.status_code == 200
+        assert response.data['id'] == str(self.admin_user.id)

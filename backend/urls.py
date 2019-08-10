@@ -27,7 +27,7 @@ from backend.core.api.GenericViewSet import GenericViewSet
 from oauth2_provider import urls
 from oauth2_provider import views
 
-from backend.core.api.endpoints import MeView
+from backend.core.api.endpoints import MeView, RegisterUserView
 
 admin.autodiscover()
 
@@ -50,7 +50,11 @@ urlpatterns = [
             re_path(r'^me$', MeView.as_view({'get': 'me'})),
             re_path(r'^me/$', MeView.as_view({'get': 'me'})),
 
-            # This has to be here because the POST cannot be redirected (from endpoint without slash to endpoint with slash)
+            re_path(r'^(?i)/users/register', RegisterUserView.as_view({'post': "register_user"})),
+            re_path(r'^(?i)/users/register/', RegisterUserView.as_view({'post': "register_user"})),
+
+            # This has to be here because the POST cannot be redirected
+            # (from endpoint without slash to endpoint with slash)
 
             re_path(r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)$',
                 GenericViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy', 'patch': 'patch'})),
