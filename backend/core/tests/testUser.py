@@ -39,9 +39,9 @@ class TestUserCreateAndUpdate(BaseApiTest):
         created_user = self.generic_view(self.get_request('post', user=self.admin_user, payload=payload), Model="users")
         assert created_user.status_code == 201
 
-        oauth_payload = "?client_id=web&username=test&password=test&grant_type=password"
-
-        response = self.oauth2_view(self.get_request('post', query_parameters=oauth_payload), name='token')
+        response = self.client.post("/api/v1/oauth2/token", {
+            "client_id": "web", "username": "test", "password": "test", "grant_type": "password"
+        })
 
         assert response.status_code == 200
 
@@ -54,7 +54,9 @@ class TestUserCreateAndUpdate(BaseApiTest):
 
         assert response.status_code == 200
 
-        response = self.oauth2_view(self.get_request('post', query_parameters=oauth_payload), name='token')
+        response = self.client.post("/api/v1/oauth2/token", {
+            "client_id": "web", "username": "test", "password": "test", "grant_type": "password"
+        })
         assert response.status_code == 200
 
         payload = {
@@ -64,9 +66,9 @@ class TestUserCreateAndUpdate(BaseApiTest):
         response = self.generic_view(self.get_request('put', user=self.admin_user, payload=payload), Model="users", id=created_user.data['id'])
         assert response.status_code == 200
 
-        oauth_payload = "?client_id=web&username=test&password=new_password&grant_type=password"
-
-        response = self.oauth2_view(self.get_request('post', query_parameters=oauth_payload), name='token')
+        response = self.client.post("/api/v1/oauth2/token", {
+            "client_id": "web", "username": "test", "password": "new_password", "grant_type": "password"
+        })
 
         assert response.status_code == 200
 
