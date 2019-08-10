@@ -50,8 +50,8 @@ urlpatterns = [
             re_path(r'^me$', MeView.as_view({'get': 'me'})),
             re_path(r'^me/$', MeView.as_view({'get': 'me'})),
 
-            re_path(r'^(?i)/users/register', RegisterUserView.as_view({'post': "register_user"})),
-            re_path(r'^(?i)/users/register/', RegisterUserView.as_view({'post': "register_user"})),
+            re_path(r'^/users/register$(?i)', RegisterUserView.as_view({'post': "register_user"})),
+            re_path(r'^/users/register/$(?i)', RegisterUserView.as_view({'post': "register_user"})),
 
             # This has to be here because the POST cannot be redirected
             # (from endpoint without slash to endpoint with slash)
