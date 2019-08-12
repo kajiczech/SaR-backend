@@ -30,5 +30,6 @@ class TestInvitation(TestCase):
         invitation = Invitation.objects.create(invitee=user, operation=operation, type="organizer")
         invitation.status = 'accepted'
         invitation.save()
+        Invitation.objects.get(pk=invitation.id)
         assert OperationsAttendees.objects.all()[0].attendee_role == AttendeeRoles.organizer
         assert operation.attendees.all()[0].id == user.id

@@ -231,6 +231,7 @@ class Invitation(BaseModel):
 
         if new_status and self.status == InvitationStatuses.accepted:
             self.link_invitee_to_operation()
+        super().save(*args, **kwargs)
 
     def link_invitee_to_operation(self):
         role = AttendeeRoles.organizer if self.type == InvitationTypes.organizer else AttendeeRoles.undefined
