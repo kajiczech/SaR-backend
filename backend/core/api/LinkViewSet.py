@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db.models import ManyToManyField, ForeignKey
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -17,9 +18,12 @@ class LinkViewSet(GenericViewSet):
         self.parent_model = self.get_model(kwargs['Model'])
         self.link = self.kwargs['Link']
         self.queryset = self.parent_model.objects
-        self.model = getattr(self.parent_model, self.link).field.model
-
+        if isinstance(getattr(self.parent_model, self.link).field, ForeignKey):
+            self.model = getattr(self.parent_model, self.link).field.model
+        else:
+            self.model = getattr(self.parent_model, self.link).field.related_model
         request = super(ModelViewSet, self).initialize_request(request, *args, **kwargs)
+
         return request
 
     def load_parent_object(self):
@@ -36,6 +40,7 @@ class LinkViewSet(GenericViewSet):
         return self.get_parent_set().all()
 
     def get_serializer_class(self):
+
         return self.model.api_controller.get_serializer(view=self)
 
     def remove(self, request, *args, **kwargs):

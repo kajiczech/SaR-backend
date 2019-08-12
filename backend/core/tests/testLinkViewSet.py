@@ -44,6 +44,10 @@ class GetRetrieve(BaseApiTest):
         for message in self.createdModels["models"]:
             assert [x["id"] for x in response.data['results']].index(str(message.id)) >= 0
 
+        response = self.view(self.get_request('get', self.admin_user), id=str(self.createdModels['models'][0].id), Model="TestModels", Link="attendees")
+        assert response.status_code == 200
+
+
     def test_filter(self):
         self.createdModels = {"models": []}
         self.createdModels["models"].append(
