@@ -2,6 +2,7 @@ import enum
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -74,15 +75,30 @@ RoleActionPermission.api_controller = BaseApiController(model=RoleActionPermissi
 
 
 class User(AbstractUser, BaseModel):
-
+    username_validator = UnicodeUsernameValidator()
     roles = models.ManyToManyField(Role, "users", blank=True)
     #     Overriding password, so it can be blank
     password = models.CharField(_('password'), max_length=128, blank=True, null=True)
     #     Overiding email, making it unique
     email = models.EmailField(_('email address'), blank=True, null=True, unique=True)
 
+    username = models.CharField(
+        _('username'),
+        max_length=150,
+        unique=True,
+        help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
+        validators=[username_validator],
+        error_messages={
+            'unique': _("A user with that username already exists."),
+        },
+        blank=True,
+        null=True
+    )
+
     def save(self, *args, **kwargs):
         # Update password only when it is changed, so we don't hash hashed password
+        if not self.username:
+            self.username = self.email
         if self.pk:
             try:
                 saved = User.objects.get(pk=self.pk)

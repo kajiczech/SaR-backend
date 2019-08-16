@@ -83,6 +83,16 @@ class TestUserCreateAndUpdate(BaseApiTest):
         user = get_user_model().objects.get(username="test")
         assert user.email == "test@test.com"
 
+    def testEmptyUsername(self):
+        response = self.user_create_view(self.get_request('post', payload={
+            "password": "test",
+            "email": "test@test.com"
+        }))
+
+        assert response.status_code == 201
+        user = get_user_model().objects.get(email="test@test.com")
+        assert user.username == "test@test.com"
+
     def testMe(self):
         response = self.me_view(self.get_request('get', self.admin_user))
         assert response.status_code == 200
