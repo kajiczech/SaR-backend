@@ -1,12 +1,48 @@
+from base64 import b64encode
+
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, serializers, permissions
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from django.apps import apps
+from rest_framework.pagination import CursorPagination
+from rest_framework.response import Response
+from rest_framework.utils.urls import replace_query_param
+from django.utils.six.moves.urllib import parse as urlparse
 
 from backend.core.api.filters.ImplicitFilter import ImplicitFilter
 from backend.core.api.filters.RequestFilter import RequestFilter
 from backend.core.api.permissions.IsAssignedUser import IsAssignedUser
 from backend.core.models import BaseModel
+
+
+class GenericPagination(CursorPagination):
+    page_size = 20
+    ordering = '-date_modified'
+    page_size_query_param = 'limit'
+
+    def get_paginated_response(self, data):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'count': len(self.page),
+            'results': data
+        })
+
+    def encode_cursor(self, cursor):
+        """
+        Returning only encoded cursor instead of whole url
+        """
+        tokens = {}
+        if cursor.offset != 0:
+            tokens['o'] = str(cursor.offset)
+        if cursor.reverse:
+            tokens['r'] = '1'
+        if cursor.position is not None:
+            tokens['p'] = cursor.position
+
+        querystring = urlparse.urlencode(tokens, doseq=True)
+        encoded = b64encode(querystring.encode('ascii')).decode('ascii')
+        return encoded
 
 
 class GenericViewSet(viewsets.ModelViewSet):
@@ -16,6 +52,11 @@ class GenericViewSet(viewsets.ModelViewSet):
     application = None
     model: BaseModel = None
     lookup_field = 'id'
+
+    pagination_class = GenericPagination
+
+    default_page_size = '5'
+    default_ordering = '-date_entered'
 
     def initialize_request(self, request, *args, **kwargs):
         if not self.model:
@@ -66,6 +107,21 @@ class GenericViewSet(viewsets.ModelViewSet):
 
     def patch(self, request, *args, **kwargs):
         return super().update(request, partial=True, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+
+        try:
+            ordering_fields = [request.query_params['order_by'], self.default_ordering]
+        except KeyError:
+            ordering_fields = self.default_ordering
+
+        class Pagination(GenericPagination):
+            ordering = ordering_fields
+
+        # The only way, how to change paginator class in the view
+        self._paginator = Pagination()
+
+        return super().list(request, *args, **kwargs)
 
 
 

@@ -37,6 +37,8 @@ class TestModel(BaseModel):
         choices=[(a.name, a.value) for a in Statuses],
         default=Statuses.scheduled
     )
+    price = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
+
     name =              models.CharField(max_length=255, blank=False)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(blank=True, null=True)
@@ -60,11 +62,7 @@ class Roles(StringEnum):
 
 
 class M2mLinkModel(BaseModel):
-    # userModel.objects.filter(
-    #   operations_attendees__attendee_role = 'Organizer',
-    #   operations_attendees__operation=operation
-    # )
-    # [x.attendee for x in operation.operations_attendees.filter(attendee_role="Organizer")]
+
     attendee = models.ForeignKey(get_user_model(), related_name="M2mLinkModel", on_delete=models.CASCADE)
     operation = models.ForeignKey(TestModel, related_name="M2mLinkModel", on_delete=models.CASCADE)
     attendee_role = models.CharField(

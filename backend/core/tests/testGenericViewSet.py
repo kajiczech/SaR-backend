@@ -85,7 +85,7 @@ class GetList(BaseApiTest):
 
         response = self.view(self.get_request('get', user=self.admin_user), Model="TestModels")
 
-        assert response.data["count"] == 3
+        assert len(response.data["results"]) == 3
         for message in self.createdModels['models']:
             assert [x["id"] for x in response.data['results']].index(str(message.id)) >= 0
 
@@ -95,9 +95,90 @@ class GetList(BaseApiTest):
         self.createdModels['models'].append(TestModel.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z"))
         TestModel.objects.create(type="bambi", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
         response = self.view(self.get_request('get', user=self.regular_user, query_parameters='?filter={"type": "flood"}'), Model="TestModels")
-        assert response.data["count"] == 2
+        assert len(response.data["results"]) == 2
         for message in self.createdModels['models']:
             assert [x["id"] for x in response.data['results']].index(str(message.id)) >= 0
+
+    def test_pagination(self):
+        self.createdModels = {"models": []}
+        for i in range(0, 50):
+            self.createdModels['models'].append(
+                TestModel.objects.create(type="flood", name="FirstOperation",
+                                         start_date="2019-04-06T14:43:{}.630468Z".format(i)))
+
+
+
+        response = self.view(self.get_request('get', user=self.regular_user, query_parameters='?limit=100'),
+                             Model="TestModels")
+        assert len(response.data["results"]) == 50
+        assert str(self.createdModels['models'][49].id) == response.data['results'][0]['id']
+
+        response = self.view(self.get_request('get', user=self.regular_user, query_parameters='?limit=7'),
+                             Model="TestModels")
+
+        assert len(response.data["results"]) == 7
+        assert str(self.createdModels['models'][49].id) == response.data['results'][0]['id']
+
+        response = self.view(self.get_request('get', user=self.regular_user, query_parameters='?limit=7'),
+                             Model="TestModels")
+
+        assert len(response.data["results"]) == 7
+        assert str(self.createdModels['models'][49].id) == response.data['results'][0]['id']
+
+        response = self.view(
+            self.get_request('get', user=self.regular_user, query_parameters='?limit=7&cursor=' + str(response.data['next'])),
+            Model="TestModels")
+
+        assert len(response.data["results"]) == 7
+        assert str(self.createdModels['models'][42].id) == response.data['results'][0]['id']
+
+        response_previous = self.view(
+            self.get_request('get', user=self.regular_user, query_parameters='?limit=7&cursor=' + str(response.data['previous'])),
+            Model="TestModels")
+
+        assert len(response_previous.data["results"]) == 7
+        assert str(self.createdModels['models'][49].id) == response_previous.data['results'][0]['id']
+
+        response = self.view(
+            self.get_request('get', user=self.regular_user,
+                             query_parameters='?limit=50&cursor=' + str(response.data['next'])),
+            Model="TestModels")
+
+        assert response.data["count"] == 36
+        assert str(self.createdModels['models'][35].id) == response.data['results'][0]['id']
+
+    def test_ordering(self):
+        self.createdModels = {"models": []}
+        self.createdModels['models'].append(
+            TestModel.objects.create(type="flood", name="FirstOperation", price=20,
+                                     start_date="2019-04-06T14:43:56.630468Z"))
+        self.createdModels['models'].append(
+            TestModel.objects.create(type="flood", name="FirstOperation", price=5,
+                                     start_date="2019-04-06T14:43:56.630468Z"))
+        self.createdModels['models'].append(
+            TestModel.objects.create(type="flood", name="FirstOperation", price=20,
+                                     start_date="2019-04-06T14:43:56.630468Z"))
+        self.createdModels['models'].append(
+            TestModel.objects.create(type="flood", name="FirstOperation", price=10,
+                                     start_date="2019-04-06T14:43:56.630468Z"))
+
+        response = self.view(
+            self.get_request('get', user=self.regular_user,
+                             query_parameters=''),
+            Model="TestModels")
+        assert response.data['results'][0]['id'] == str(self.createdModels['models'][3].id)
+
+        response = self.view(
+            self.get_request('get', user=self.regular_user,
+                             query_parameters='?order_by=-price'),
+            Model="TestModels")
+        assert response.data['results'][0]['id'] == str(self.createdModels['models'][2].id)
+
+        response = self.view(
+            self.get_request('get', user=self.regular_user,
+                             query_parameters='?order_by=price'),
+            Model="TestModels")
+        assert response.data['results'][0]['id'] == str(self.createdModels['models'][1].id)
 
 
 class PostCreate(BaseApiTest):
