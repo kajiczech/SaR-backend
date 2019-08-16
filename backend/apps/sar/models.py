@@ -51,6 +51,21 @@ class Operation(BaseModel):
 
     attendees = models.ManyToManyField(get_user_model(), related_name="operations", through='OperationsAttendees')
 
+    def save(self, *args, **kwargs):
+        creating = False
+        try:
+            Operation.objects.get(pk=self.pk)
+        except (Operation.DoesNotExist, ValueError):
+            creating=True
+        super().save(*args, **kwargs)
+        if creating and self.created_by:
+            link = OperationsAttendees(
+                attendee_role=AttendeeRoles.organizer,
+                operation=self,
+                attendee=self.created_by
+            )
+            link.save()
+
 
 Operation.api_controller = BaseApiController(Operation)
 
