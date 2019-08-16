@@ -55,8 +55,6 @@ class GenericViewSet(viewsets.ModelViewSet):
 
     pagination_class = GenericPagination
 
-    default_page_size = '5'
-    default_ordering = '-date_entered'
 
     def initialize_request(self, request, *args, **kwargs):
         if not self.model:
@@ -111,15 +109,15 @@ class GenericViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
 
         try:
-            ordering_fields = [request.query_params['order_by'], self.default_ordering]
+            ordering_fields = [request.query_params['order_by'], GenericPagination.ordering]
+
+            class Pagination(GenericPagination):
+                ordering = ordering_fields
+
+            # The only way, how to change paginator class in the view
+            self._paginator = Pagination()
         except KeyError:
-            ordering_fields = self.default_ordering
-
-        class Pagination(GenericPagination):
-            ordering = ordering_fields
-
-        # The only way, how to change paginator class in the view
-        self._paginator = Pagination()
+            pass
 
         return super().list(request, *args, **kwargs)
 
