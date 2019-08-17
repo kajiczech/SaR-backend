@@ -112,4 +112,3 @@ class User(AbstractUser, BaseModel):
 
 
 User.api_controller = BaseApiController(model=User, hidden_fields=['password'])
-
