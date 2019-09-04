@@ -27,10 +27,10 @@ class Authentication(APITestCase):
         self.admin_user.save()
         self.create_applicatioin()
 
-    def testAdminAuthentication(self):
+    def testEmailLogin(self):
         response = self.client.post("/api/v1/oauth2/token", {
-            "client_id": "web", "username": "admin", "password": "admin", "grant_type": "password"
+            "client_id": "web", "email": "admin@google.com", "password": "admin", "grant_type": "password"
         })
+
         assert response.status_code == 200
-        assert json.loads(response.content.decode("utf-8"))['access_token']
         assert json.loads(response.content.decode("utf-8"))['access_token']

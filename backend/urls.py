@@ -16,7 +16,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls import include
-from backend.core.api import authorization
 from oauth2_provider import views
 
 
@@ -27,13 +26,14 @@ urlpatterns = [
 
     re_path(r'^api/', include([
         re_path(r'^(?P<version>(v1))/', include([
-            re_path(r'^oauth2/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+            re_path("", include('backend.core.urls')),
+            re_path("", include('backend.apps.sar.urls')),
 
             re_path(r"^oauth2/authorize$", views.AuthorizationView.as_view(), name="authorize"),
-            re_path(r"^oauth2/token$", authorization.TokenView.as_view(), name="token"),
+            re_path(r"^oauth2/token$", views.TokenView.as_view(), name="token"),
             re_path(r"^oauth2/revoke_token$", views.RevokeTokenView.as_view(), name="revoke-token"),
             re_path(r"^oauth2/introspect$", views.IntrospectTokenView.as_view(), name="introspect"),
-            re_path("", include('backend.core.urls')),
+            re_path(r'^oauth2/', include('oauth2_provider.urls', namespace='oauth2_provider')),
         ]))
     ])),
 
