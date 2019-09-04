@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from backend.core.tests.models import *
 # from backend.apps.sar.models import *
 
-from backend.core.api.GenericViewSet import GenericViewSet
+from backend.core.api.endpoints import GenericEndpoint
 from rest_framework.test import APITestCase
 from datetime import timedelta
 from django.contrib.auth import get_user_model
@@ -75,7 +75,7 @@ class GetList(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'get': 'list'})
+        self.view = GenericEndpoint.as_view({'get': 'list'})
 
     def test_basic_list(self):
         self.createdModels = {"models": []}
@@ -185,7 +185,7 @@ class PostCreate(BaseApiTest):
     
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'post': 'create'})
+        self.view = GenericEndpoint.as_view({'post': 'create'})
     
     def test_basic_create(self):
         payload = {
@@ -210,7 +210,7 @@ class PutUpdate(BaseApiTest):
     
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'put': 'update', "patch": "patch"})
+        self.view = GenericEndpoint.as_view({'put': 'update', "patch": "patch"})
 
     def test_basic_update(self):
         message = TestModel.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
@@ -237,7 +237,7 @@ class GetRetrieve(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'get': 'retrieve'})
+        self.view = GenericEndpoint.as_view({'get': 'retrieve'})
 
     def test_basic_retrieve(self):
         message = TestModel.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")
@@ -257,7 +257,7 @@ class DeleteDestroy(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'delete': 'destroy'})
+        self.view = GenericEndpoint.as_view({'delete': 'destroy'})
 
     def test_basic_delete(self):
         message = TestModel.objects.create(type="flood", name="FirstOperation", start_date="2019-04-06T14:43:56.630468Z")

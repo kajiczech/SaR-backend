@@ -16,24 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls import include
-
-from rest_framework import generics, permissions, serializers, views
-
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
-
 from backend.core.api import authorization
-from backend.core.api.LinkViewSet import LinkViewSet
-from backend.core.api.GenericViewSet import GenericViewSet
-from oauth2_provider import urls
 from oauth2_provider import views
 
-from backend.core.api.endpoints import MeView, RegisterUserView
 
 admin.autodiscover()
-
-
-
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -46,39 +33,7 @@ urlpatterns = [
             re_path(r"^oauth2/token$", authorization.TokenView.as_view(), name="token"),
             re_path(r"^oauth2/revoke_token$", views.RevokeTokenView.as_view(), name="revoke-token"),
             re_path(r"^oauth2/introspect$", views.IntrospectTokenView.as_view(), name="introspect"),
-
-            re_path(r'^me$', MeView.as_view({'get': 'me'})),
-            re_path(r'^me/$', MeView.as_view({'get': 'me'})),
-
-            re_path(r'^users/register$(?i)', RegisterUserView.as_view({'post': "register_user"})),
-            re_path(r'^users/register/$(?i)', RegisterUserView.as_view({'post': "register_user"})),
-
-            # This has to be here because the POST cannot be redirected
-            # (from endpoint without slash to endpoint with slash)
-
-            re_path(r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)$',
-                GenericViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy', 'patch': 'patch'})),
-
-            re_path(r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)/$',
-                GenericViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy', 'patch': 'patch'})),
-
-
-            re_path(r'^(?P<Model>[A-Za-z_-]+)$',
-                GenericViewSet.as_view({'get': 'list', 'post': 'create', })),
-            re_path(r'^(?P<Model>[A-Za-z_-]+)/$',
-                GenericViewSet.as_view({'get': 'list', 'post': 'create'})),
-
-            re_path(
-                r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)/link/(?P<Link>[A-Za-z-_]+)$',
-                LinkViewSet.as_view({'get': 'list', 'post': "add",  'delete': 'remove'})
-            ),
-
-            re_path(
-                r'^(?P<Model>[A-Za-z_-]+)/(?P<id>[0-9a-f-]+)/link/(?P<Link>[A-Za-z-_]+)/$',
-                LinkViewSet.as_view({'get': 'list', 'post': "add", 'delete': 'remove'})
-            ),
-
-
+            re_path("", include('backend.core.urls')),
         ]))
     ])),
 

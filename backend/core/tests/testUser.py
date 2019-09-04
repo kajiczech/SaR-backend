@@ -2,13 +2,13 @@ from oauth2_provider import views
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
 
-from backend.core.api.GenericViewSet import GenericViewSet
+from backend.core.api.endpoints import GenericEndpoint
 from django.contrib.auth import get_user_model
 from oauth2_provider.models import get_application_model
 from oauth2_provider.models import get_access_token_model
 
-from backend.core.api.endpoints import RegisterUserView, MeView
-from backend.core.tests.testGenericViewSet import BaseApiTest
+from backend.core.api.endpoints import RegisterUserEndpoint, MeEndpoint
+from backend.core.tests.testGenericEndpoint import BaseApiTest
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
@@ -20,9 +20,9 @@ class TestUserCreateAndUpdate(BaseApiTest):
     def setUp(self):
         super().setUp()
         self.oauth2_view = views.TokenView.as_view()
-        self.generic_view = self.view = GenericViewSet.as_view({'post': 'create', "put": "update"})
-        self.user_create_view = RegisterUserView.as_view({'post': "register_user"})
-        self.me_view = MeView.as_view({'get': "me"})
+        self.generic_view = self.view = GenericEndpoint.as_view({'post': 'create', "put": "update"})
+        self.user_create_view = RegisterUserEndpoint.as_view({'post': "register_user"})
+        self.me_view = MeEndpoint.as_view({'get': "me"})
 
     def get_put_request(self, user=None, query_parameters=None, payload=None):
         factory = APIRequestFactory()

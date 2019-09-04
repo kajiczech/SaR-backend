@@ -1,12 +1,13 @@
 from backend.core.tests.models import *
-from backend.core.api.GenericViewSet import GenericViewSet
-from backend.core.tests.testGenericViewSet import BaseApiTest
+from backend.core.api.endpoints import GenericEndpoint
+from backend.core.tests.testGenericEndpoint import BaseApiTest
+
 
 class TestManyToManyController(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = GenericViewSet.as_view({'get': 'retrieve'})
+        self.view = GenericEndpoint.as_view({'get': 'retrieve'})
 
     def test_basic_serialization(self):
 

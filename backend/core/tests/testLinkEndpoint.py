@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from oauth2_provider.models import get_application_model
 from oauth2_provider.models import get_access_token_model
 
-from backend.core.api.LinkViewSet import LinkViewSet
-from backend.core.tests.testGenericViewSet import BaseApiTest
+from backend.core.api.endpoints import LinkEndpoint
+from backend.core.tests.testGenericEndpoint import BaseApiTest
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
@@ -15,7 +15,7 @@ class GetRetrieve(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = LinkViewSet.as_view({'get': 'list'})
+        self.view = LinkEndpoint.as_view({'get': 'list'})
 
     def test_basic_list(self):
         self.createdModels = {"models": []}
@@ -83,7 +83,7 @@ class GetRetrieve(BaseApiTest):
 class PostAdd(BaseApiTest):
     def setUp(self):
         super().setUp()
-        self.view = LinkViewSet.as_view({'post': 'add'})
+        self.view = LinkEndpoint.as_view({'post': 'add'})
 
     def test_add(self):
         operation = TestModel.objects.create(
@@ -127,7 +127,7 @@ class DeleteRemove(BaseApiTest):
 
     def setUp(self):
         super().setUp()
-        self.view = LinkViewSet.as_view({'delete': 'remove'})
+        self.view = LinkEndpoint.as_view({'delete': 'remove'})
 
     def test_delete(self):
         operation = TestModel.objects.create(
