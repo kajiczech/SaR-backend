@@ -47,6 +47,16 @@ class GetRetrieve(BaseApiTest):
         response = self.view(self.get_request('get', self.admin_user), id=str(self.createdModels['models'][0].id), Model="TestModels", Link="attendees")
         assert response.status_code == 200
 
+    def test_m2m_link_list(self):
+        operation = TestModel.objects.create(type="flood", name="FirstOperation",
+                                             start_date="2019-04-06T14:43:56.630468Z"
+                                             )
+        M2mLinkModel.objects.create(attendee=self.regular_user, operation=operation,
+                                           attendee_role='Organizer'
+                                           )
+        response = self.view(self.get_request('get', self.regular_user), id=str(self.regular_user.id), Model="users", Link="test_models")
+        assert response.data['results'][0]['id'] == str(operation.id)
+
     def test_filter(self):
         self.createdModels = {"models": []}
         self.createdModels["models"].append(

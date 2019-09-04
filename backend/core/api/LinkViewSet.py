@@ -18,13 +18,18 @@ class LinkViewSet(GenericViewSet):
         self.parent_model = self.get_model(kwargs['Model'])
         self.link = self.kwargs['Link']
         self.queryset = self.parent_model.objects
-        if isinstance(getattr(self.parent_model, self.link).field, ForeignKey):
-            self.model = getattr(self.parent_model, self.link).field.model
-        else:
-            self.model = getattr(self.parent_model, self.link).field.related_model
+        self.model = self.get_model_from_parent(self.parent_model, self.link)
         request = super(ModelViewSet, self).initialize_request(request, *args, **kwargs)
 
         return request
+
+    @staticmethod
+    def get_related_model(parent_model, link):
+        link_field = getattr(parent_model, link).field
+        if isinstance(link_field, ForeignKey) or isinstance(link_field, ManyToManyField):
+            return link_field.model
+        else:
+            return link_field.related_model
 
     def load_parent_object(self):
         if self.parent:
