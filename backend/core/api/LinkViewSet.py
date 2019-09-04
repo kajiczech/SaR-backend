@@ -18,7 +18,7 @@ class LinkViewSet(GenericViewSet):
         self.parent_model = self.get_model(kwargs['Model'])
         self.link = self.kwargs['Link']
         self.queryset = self.parent_model.objects
-        self.model = self.get_model_from_parent(self.parent_model, self.link)
+        self.model = self.get_related_model(self.parent_model, self.link)
         request = super(ModelViewSet, self).initialize_request(request, *args, **kwargs)
 
         return request
