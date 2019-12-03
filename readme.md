@@ -1,18 +1,20 @@
+# API Documentation
+https://sarwithdronetag.docs.apiary.io/#
+
+# Installation
 **All commands are executed in the project root directory**
 
-#Installation
-
-##Python version
+## Python version
 
 Python version must be `3.6` or higher
 
-##Python Requirements
+## Python Requirements
 
     pip install requirements.txt
 
-##Settings
+## Settings
 
-###Selecting settings
+### Selecting settings
 Set environmental variable to the desired settings module or run `manage.py` with `--settings=<settings_module>`
  flag
  
@@ -26,7 +28,7 @@ or
 
 You can create your own local settings use them as described above.
     
-###Database
+### Database
 In settings module set up `DATABASES` array for your DB
 
     DATABASES = {
@@ -40,26 +42,26 @@ In settings module set up `DATABASES` array for your DB
         }
     }
     
-###Allowed hosts
+### Allowed hosts
 In settings module, set hostname of your server to `ALLOWED_HOSTS` array
 
 e.g.
 
         ALLOWED_HOSTS = ['backend', 'localhost', 'turaco.eu']
 
-##Migration
+## Migration
 To create database or make database changes, run
 
     python manage.py migrate
 
-##Create static files
+## Create static files
 To create static files (for administration and rest framework overhead), run
 
     python manage.py collectstatic --no-input
     
 #How to run
 
-###Development
+### Development
 In a development environment, run
 
     python manage.py runserver 0.0.0.0:<port>
@@ -67,14 +69,14 @@ In a development environment, run
 **With this, the server will restart every time you make change to any source file**
 
 
-###Production
+### Production
 In a production environment, run
 
     gunicorn backend.wsgi -b 0.0.0.0:<port> 
 
 To restart, you need to kill the gunicorn process and run this again
 
-#Deployment
+# Deployment
 
 To run this project from scratch, run these commands
 
@@ -85,7 +87,7 @@ To run this project from scratch, run these commands
     python manage.py collectstatic --no-input
     python manage.py runserver 0.0.0.0:<port>
 
-#Initial setup
+# Initial setup
 To be able to access django administration and create an Oauth2 client to be able to authenticate, you need to create a superuser first.
 To create superuser run
   
@@ -98,9 +100,9 @@ and fill the fields. Then in django administration create a new oauth applicatio
 - Authorization grant type - Resource owner password-based
 - client secret - leave empty
 
-#Debug
+# Debug
 
-##Docker on Mac with PyCharm
+## Docker on Mac with PyCharm
    to debug on mac with docker follow remote debug server configuration tutorial (not ssh).
    copy pycharm-debug.egg to project root directory
     
